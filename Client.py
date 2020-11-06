@@ -53,6 +53,37 @@ class Client_MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.socket.readyRead.connect(self.processPendingDatagrams)
 
+        self.minimizeAction = QtWidgets.QAction("Minimize", self)
+        self.restoreAction = QtWidgets.QAction("Restore", self)
+        self.quitAction = QtWidgets.QAction("Exit", self)
+
+        self.trayIconMenu = QtWidgets.QMenu(self)
+        self.trayIconMenu.addAction(self.minimizeAction)
+        self.trayIconMenu.addAction(self.restoreAction)
+        self.trayIconMenu.addAction(self.quitAction)
+
+        self.setTrayIconActions()
+        self.showTrayIcon()
+
+    def showTrayIcon(self):
+        self.trayicon = QtWidgets.QSystemTrayIcon(self)
+        self.icon = QtGui.QIcon('alert.jpg')
+        self.trayicon.setIcon(self.icon)
+        self.trayicon.setContextMenu(self.trayIconMenu)
+
+        self.model.dataChanged.connect(self.trayActionExecute)
+
+        self.trayicon.show()
+
+    def trayActionExecute(self):
+        QtWidgets.QSystemTrayIcon.showMessage(self.trayicon, "Alert", "Test")
+
+
+    def setTrayIconActions(self):
+        self.minimizeAction.triggered.connect(self.hide)
+        self.restoreAction.triggered.connect(self.showNormal)
+        self.quitAction.triggered.connect(QtWidgets.QApplication.quit)
+
     def processPendingDatagrams(self):
 
         while self.socket.hasPendingDatagrams():
@@ -66,11 +97,10 @@ class Client_MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             index = self.model.index(row, 0)
             self.model.setData(index, data)
 
-    def test(self):
-
-        self.model.insertRow(0)
-        index = self.model.index(0, 0)
-        self.model.setData(index, {"time": "1", "date": "2", "message": "3"})
+    def changeEvent(self, a0: QtCore.QEvent) -> None:
+        if a0.type() == QtCore.QEvent.WindowStateChange:
+            if self.isMinimized():
+                self.hide()
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)

@@ -43,6 +43,8 @@ class TableModel(QtCore.QAbstractTableModel):
         row = index.row()
 
         self.mylist[row] = value
+
+        self.dataChanged.emit(self.index(0, 0), self.index(self.rowCount() - 1, 2))
         return True
 
     def insertRows(self, row: int, count: int, parent=QModelIndex()) -> bool:
