@@ -1,8 +1,10 @@
 import sys
 import datetime
 import json
+import _sqlite3 as sql
 from PyQt5 import QtCore, QtGui, QtWidgets, QtNetwork
 from MyTableModel import TableModel
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -59,6 +61,17 @@ class Server_MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         super(Server_MainWindow, self).__init__()
         super(Ui_MainWindow, self).__init__()
         self.setupUi(self)
+        self.dbcon = sql.connect('database.db')
+
+        # with self.dbcon:
+        #     self.dbcon.execute("""
+        #         CREATE TABLE ALERTS (
+        #             id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT DEFAULT 0,
+        #             time TEXT,
+        #             date TEXT,
+        #             message TEXT
+        #         );
+        #     """)
 
         self.tablemodel = TableModel()
         self.tableview.setModel(self.tablemodel)
@@ -66,6 +79,7 @@ class Server_MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.tableview.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
 
         self.socket = QtNetwork.QUdpSocket(self)
+        self.socket.bind(QtNetwork.QHostAddress.LocalHost, 45454)
 
         self.send_button.pressed.connect(self.addMessage)
 
@@ -74,6 +88,7 @@ class Server_MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.tablemodel.insertRow(row)
         index = self.tablemodel.index(row, 0)
         today = datetime.datetime.today()
+        request = 'INSERT INTO ALERTS (time, date, message) VALUES(?, ?, ?)'
 
         self.tablemodel.setData(index, {"time": today.strftime("%H:%M"), "date": today.strftime("%d.%m.%Y"),
                                         "message": self.textedit.toPlainText()})
@@ -83,6 +98,14 @@ class Server_MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 "date": self.tablemodel.data(self.tablemodel.index(row, 1)),
                 "message": self.tablemodel.data(self.tablemodel.index(row, 2))}
 
+        d = tuple(data.values())
+
+        with self.dbcon:
+            self.dbcon.execute(request, d)
+
+            result = self.dbcon.execute("SELECT * FROM ALERTS")
+            for row in result:
+                print(row)
         jdata = json.dumps(data)
 
         jbytes = bytearray(jdata, encoding='utf-8')
