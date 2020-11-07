@@ -79,7 +79,7 @@ class Server_MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.tableview.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
 
         self.socket = QtNetwork.QUdpSocket(self)
-        self.socket.bind(QtNetwork.QHostAddress.LocalHost, 45454)
+        self.socket.bind(QtNetwork.QHostAddress.LocalHost, 45454, QtNetwork.QAbstractSocket.ReuseAddressHint)
 
         self.send_button.pressed.connect(self.addMessage)
 

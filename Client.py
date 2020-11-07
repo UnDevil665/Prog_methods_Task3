@@ -49,12 +49,13 @@ class Client_MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.tableview.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
 
         self.socket = QtNetwork.QUdpSocket(self)
-        self.socket.bind(QtNetwork.QHostAddress.Any, 45454, QtNetwork.QUdpSocket.ShareAddress)
+        self.socket.bind(QtNetwork.QHostAddress.LocalHost, 45454, QtNetwork.QUdpSocket.ReuseAddressHint)
+
+        self.socket.errorOccurred.connect(self.socketHasError)
 
         self.socket.readyRead.connect(self.processPendingDatagrams)
+        QtWidgets.QMessageBox.information(self, "A connection error has occurred", self.socket.errorString())
 
-        if self.socket.error():
-            QtWidgets.QMessageBox.information(self, "Unable to open connection", self.socket.errorString())
 
         self.minimizeAction = QtWidgets.QAction("Minimize", self)
         self.restoreAction = QtWidgets.QAction("Restore", self)
@@ -70,6 +71,9 @@ class Client_MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.setTrayIconActions()
         self.showTrayIcon()
+
+    def socketHasError(self):
+        QtWidgets.QMessageBox.information(self, "A connection error has occurred", self.socket.errorString())
 
     def showTrayIcon(self):
 
