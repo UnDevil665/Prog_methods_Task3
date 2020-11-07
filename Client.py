@@ -81,7 +81,14 @@ class Client_MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.trayicon.show()
 
     def trayActionExecute(self):
-        QtWidgets.QSystemTrayIcon.showMessage(self.trayicon, "Alert", "Test")
+        data = ""
+        row = self.model.rowCount() - 1
+        column = 2
+        index = self.model.index(row, column)
+
+        data += self.model.data(index)
+
+        QtWidgets.QSystemTrayIcon.showMessage(self.trayicon, "Alert", data)
 
     def setTrayIconActions(self):
         self.minimizeAction.triggered.connect(self.hide)
