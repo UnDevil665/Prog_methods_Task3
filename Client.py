@@ -54,7 +54,6 @@ class Client_MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.socket.errorOccurred.connect(self.socketHasError)
 
         self.socket.readyRead.connect(self.processPendingDatagrams)
-        QtWidgets.QMessageBox.information(self, "A connection error has occurred", self.socket.errorString())
 
 
         self.minimizeAction = QtWidgets.QAction("Minimize", self)
