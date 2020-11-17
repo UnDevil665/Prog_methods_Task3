@@ -73,7 +73,7 @@ class TableModel(QtCore.QAbstractTableModel):
         self.removeRows(row, 1, parent)
         return True
 
-    def flags(self, index: QModelIndex) -> Qt.ItemFlags:
+    def flags(self, index: QModelIndex):
         if not index.isValid():
             return Qt.ItemIsEnabled
 
